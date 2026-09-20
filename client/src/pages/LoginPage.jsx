@@ -9,6 +9,7 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, error } = useSelector((s) => s.auth);
+  const [showPassword, setShowPassword] = React.useState(false);
 
   useEffect(() => {
     if (user) navigate('/');
@@ -22,74 +23,77 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container my-5">
-      <div className="row justify-content-center">
-        <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body p-4">
-              <div className="text-center mb-4">
-                <h1 className="h3 fw-bold mb-2" style={{ color: 'var(--primary)' }}>
-                  📱 Đăng nhập
-                </h1>
-                <p className="text-muted small">Truy cập tài khoản của bạn</p>
-              </div>
+    <div className="auth-wrapper">
+      <div className="auth-glass-card">
+        <div className="text-center mb-4">
+          <div className="brand-icon-wrapper mx-auto mb-3" style={{ width: '54px', height: '54px', fontSize: '1.6rem' }}>
+            📱
+          </div>
+          <h1 className="h4 fw-bold text-dark mb-1">Chào mừng trở lại!</h1>
+          <p className="text-muted small">Đăng nhập tài khoản Phone DZ của bạn</p>
+        </div>
 
-              {error && (
-                <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                  <strong>⚠️ Lỗi:</strong> {error}
-                  <button
-                    type="button"
-                    className="btn-close btn-sm"
-                    data-bs-dismiss="alert"
-                  ></button>
-                </div>
-              )}
+        {error && (
+          <div className="alert alert-danger border-0 rounded-3 small p-3 mb-3 d-flex align-items-center gap-2">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+        )}
 
-              <form className="vstack gap-3" onSubmit={handleSubmit(onSubmit)}>
-                <div>
-                  <label className="form-label fw-bold">Email</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    {...register('email', { required: 'Email là bắt buộc' })}
-                    placeholder="you@example.com"
-                  />
-                </div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="mb-3">
+            <label className="form-label">Email đăng nhập</label>
+            <input
+              type="email"
+              className="form-control"
+              placeholder="name@example.com"
+              {...register('email', { required: 'Email là bắt buộc' })}
+            />
+          </div>
 
-                <div>
-                  <label className="form-label fw-bold">Mật khẩu</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    {...register('password', { required: 'Mật khẩu là bắt buộc' })}
-                    placeholder="••••••••"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100 fw-bold py-2"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? '⏳ Đang đăng nhập...' : '✓ Đăng nhập'}
-                </button>
-              </form>
-
-              <div className="text-center mt-4 pt-3 border-top">
-                <p className="text-muted mb-0 small">
-                  Chưa có tài khoản?{' '}
-                  <Link to="/register" className="fw-bold text-primary text-decoration-none">
-                    Đăng ký
-                  </Link>
-                </p>
-                <p className="text-muted mb-0 small">
-                  <Link to="/forgot-password" className="text-decoration-none">
-                    Quên mật khẩu?
-                  </Link>
-                </p>
-              </div>
+          <div className="mb-3">
+            <div className="d-flex justify-content-between align-items-center mb-1">
+              <label className="form-label mb-0">Mật khẩu</label>
+              <Link to="/forgot-password" className="small text-primary text-decoration-none">
+                Quên mật khẩu?
+              </Link>
+            </div>
+            <div className="password-toggle-wrap">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="form-control"
+                placeholder="••••••••"
+                {...register('password', { required: 'Mật khẩu là bắt buộc' })}
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex="-1"
+                title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
             </div>
           </div>
+
+          <button
+            type="submit"
+            className="btn btn-glow btn-shine w-100 py-2 fw-bold mt-2"
+            disabled={isSubmitting}
+            style={{ borderRadius: 'var(--radius-md)' }}
+          >
+            {isSubmitting ? '⏳ Đang đăng nhập...' : 'Đăng nhập ngay'}
+          </button>
+        </form>
+
+        <div className="text-center mt-4 pt-3 border-top">
+          <p className="text-muted small mb-0">
+            Chưa có tài khoản?{' '}
+            <Link to="/register" className="fw-bold text-primary text-decoration-none">
+              Đăng ký miễn phí
+            </Link>
+          </p>
         </div>
       </div>
     </div>

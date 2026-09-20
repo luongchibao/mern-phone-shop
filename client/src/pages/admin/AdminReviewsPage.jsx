@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios.js';
+import AdminNav from '../../components/AdminNav.jsx';
 
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState([]);
@@ -9,18 +10,19 @@ export default function AdminReviewsPage() {
 
   const loadReviews = async () => {
     try {
+      setLoading(true);
       const { data } = await api.get('/admin/reviews');
       setReviews(data.reviews || []);
-      
-      // Tính stats
+
       const total = data.reviews.length;
-      const avgRating = total > 0 
-        ? (data.reviews.reduce((sum, r) => sum + r.rating, 0) / total).toFixed(1)
-        : 0;
+      const avgRating =
+        total > 0
+          ? (data.reviews.reduce((sum, r) => sum + r.rating, 0) / total).toFixed(1)
+          : 0;
       setStats({ total, avgRating });
     } catch (error) {
       console.error(error);
-      alert('Lỗi tải dữ liệu!');
+      alert('Lỗi tải dữ liệu đánh giá!');
     } finally {
       setLoading(false);
     }
@@ -31,8 +33,8 @@ export default function AdminReviewsPage() {
   }, []);
 
   const handleDelete = async (productId, reviewId) => {
-    if (!confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
-    
+    if (!window.confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
+
     try {
       await api.delete(`/products/${productId}/reviews/${reviewId}`);
       alert('✓ Đã xóa đánh giá!');
@@ -42,132 +44,128 @@ export default function AdminReviewsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="container my-5">
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container my-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold" style={{ color: 'var(--primary)' }}>
-          💬 Quản lý đánh giá
-        </h2>
-        <Link to="/admin" className="btn btn-outline-secondary">
-          ← Quay lại Dashboard
-        </Link>
+    <div className="container my-4 my-md-5">
+      {/* HEADER */}
+      <div className="mb-4">
+        <h1 className="h3 fw-bold mb-1 text-dark">
+          💬 Quản Lý Đánh Giá
+        </h1>
+        <p className="text-muted small">
+          Kiểm duyệt và quản lý các bình luận, phản hồi của người dùng về sản phẩm
+        </p>
       </div>
 
-      {/* STATS CARDS */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-4">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body text-center">
-              <h3 className="display-6 fw-bold text-primary mb-0">{stats.total}</h3>
-              <p className="text-muted mb-0">Tổng đánh giá</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body text-center">
-              <h3 className="display-6 fw-bold text-warning mb-0">{stats.avgRating} ⭐</h3>
-              <p className="text-muted mb-0">Điểm trung bình</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body text-center">
-              <h3 className="display-6 fw-bold text-success mb-0">
-                {reviews.filter(r => new Date(r.createdAt) > new Date(Date.now() - 7*24*60*60*1000)).length}
-              </h3>
-              <p className="text-muted mb-0">Mới trong 7 ngày</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ADMIN SUBNAV */}
+      <AdminNav />
 
-      {/* REVIEWS TABLE */}
-      <div className="card border-0 shadow-sm">
-        <div className="card-header bg-light border-bottom py-3">
-          <h5 className="card-title mb-0 fw-bold">Danh sách đánh giá mới nhất</h5>
+      {loading ? (
+        <div className="text-center py-5 my-5">
+          <div className="spinner-border text-primary spinner-border-sm" role="status">
+            <span className="visually-hidden">Đang tải...</span>
+          </div>
+          <p className="mt-3 text-muted">Đang tải danh sách đánh giá...</p>
         </div>
-        <div className="card-body p-0">
-          {reviews.length > 0 ? (
-            <div className="table-responsive">
-              <table className="table table-hover mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th style={{ width: '15%' }}>Sản phẩm</th>
-                    <th style={{ width: '12%' }}>Người dùng</th>
-                    <th style={{ width: '8%' }}>Đánh giá</th>
-                    <th style={{ width: '40%' }}>Nội dung</th>
-                    <th style={{ width: '15%' }}>Thời gian</th>
-                    <th style={{ width: '10%' }} className="text-center">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reviews.map((review) => (
-                    <tr key={review._id}>
-                      <td>
-                        <Link 
-                          to={`/product/${review.productId}`}
-                          className="text-decoration-none text-primary fw-semibold"
-                          style={{ fontSize: '0.9rem' }}
-                        >
-                          {review.productName}
-                        </Link>
-                      </td>
-                      <td>
-                        <div>
-                          <strong style={{ fontSize: '0.9rem' }}>{review.username}</strong>
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ color: '#ffc107', fontSize: '1.1rem' }}>
-                          {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                        </div>
-                        <small className="text-muted">({review.rating}/5)</small>
-                      </td>
-                      <td>
-                        <p className="mb-0 text-muted" style={{ fontSize: '0.9rem' }}>
-                          {review.comment?.length > 100 
-                            ? review.comment.substring(0, 100) + '...' 
-                            : review.comment}
-                        </p>
-                      </td>
-                      <td>
-                        <small className="text-muted">
-                          {new Date(review.createdAt).toLocaleString('vi-VN')}
-                        </small>
-                      </td>
-                      <td className="text-center">
-                        <button
-                          onClick={() => handleDelete(review.productId, review._id)}
-                          className="btn btn-danger btn-sm"
-                          title="Xóa đánh giá"
-                        >
-                          🗑️
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      ) : (
+        <>
+          {/* STATS CARDS */}
+          <div className="row g-3 mb-4">
+            <div className="col-12 col-md-4">
+              <div className="card border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+                <span className="text-muted small fw-semibold">Tổng lượt đánh giá</span>
+                <h3 className="h2 fw-bold text-primary mt-1 mb-0">{stats.total}</h3>
+              </div>
             </div>
-          ) : (
-            <div className="text-center py-5 text-muted">
-              <p>Chưa có đánh giá nào</p>
+            <div className="col-12 col-md-4">
+              <div className="card border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+                <span className="text-muted small fw-semibold">Điểm số trung bình</span>
+                <h3 className="h2 fw-bold text-warning mt-1 mb-0">⭐ {stats.avgRating} / 5</h3>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
+            <div className="col-12 col-md-4">
+              <div className="card border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+                <span className="text-muted small fw-semibold">Nhận xét tuần qua</span>
+                <h3 className="h2 fw-bold text-success mt-1 mb-0">
+                  {reviews.filter((r) => new Date(r.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          {/* REVIEWS TABLE */}
+          <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div className="p-3 bg-light border-bottom">
+              <h5 className="h6 fw-bold mb-0 text-dark">
+                Danh sách đánh giá mới nhất ({reviews.length})
+              </h5>
+            </div>
+
+            <div className="p-0">
+              {reviews.length > 0 ? (
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle mb-0">
+                    <thead className="table-light small">
+                      <tr>
+                        <th>Sản phẩm</th>
+                        <th>Người gửi</th>
+                        <th>Sao</th>
+                        <th>Nội dung nhận xét</th>
+                        <th>Thời gian</th>
+                        <th className="text-center" style={{ width: '60px' }}>Xóa</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reviews.map((review) => (
+                        <tr key={review._id}>
+                          <td>
+                            <Link
+                              to={`/product/${review.productId}`}
+                              className="text-decoration-none text-primary fw-semibold small"
+                            >
+                              {review.productName}
+                            </Link>
+                          </td>
+                          <td>
+                            <strong className="text-dark small">{review.username}</strong>
+                          </td>
+                          <td>
+                            <div className="text-warning small" style={{ letterSpacing: '2px' }}>
+                              {'★'.repeat(review.rating)}
+                            </div>
+                          </td>
+                          <td>
+                            <p className="mb-0 text-secondary small" style={{ maxWidth: '340px' }}>
+                              {review.comment}
+                            </p>
+                          </td>
+                          <td>
+                            <small className="text-muted">
+                              {new Date(review.createdAt).toLocaleString('vi-VN')}
+                            </small>
+                          </td>
+                          <td className="text-center">
+                            <button
+                              onClick={() => handleDelete(review.productId, review._id)}
+                              className="btn btn-sm btn-outline-danger p-1"
+                              title="Xóa đánh giá"
+                            >
+                              🗑️
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-5 text-muted">
+                  <p className="mb-0">Chưa có đánh giá nào từ khách hàng.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

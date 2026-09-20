@@ -7,89 +7,90 @@ export default function ProductCard({ p }) {
     p.image ||
     '';
 
+  const installmentPerMonth = p.price ? Math.round(p.price / 12) : 0;
+
   return (
-    <div>
-      <Link
-        to={`/product/${p._id}`}
-        className="text-decoration-none text-dark"
-      >
-        <div className="card h-100 shadow-sm border-0 transition" style={{ overflow: 'hidden' }}>
-          {imgSrc && (
-            <div
-              style={{
-                height: '200px',
-                background: 'var(--light-bg)',
-                overflow: 'hidden',
-              }}
-            >
-              <img
-                src={imgSrc}
-                className="w-100 h-100"
-                alt={p.name}
-                style={{
-                  objectFit: 'cover',
-                  transition: 'transform 0.3s ease',
-                }}
-                onMouseEnter={(e) => (e.target.style.transform = 'scale(1.05)')}
-                onMouseLeave={(e) => (e.target.style.transform = 'scale(1)')}
-              />
+    <Link
+      to={`/product/${p._id}`}
+      className="product-card-modern"
+    >
+      {/* THUMBNAIL CONTAINER */}
+      <div className="product-card-thumb-wrap">
+        {p.brand && (
+          <span className="product-badge-float">
+            {p.brand}
+          </span>
+        )}
+
+        {/* DISCOUNT BADGE */}
+        <span className="product-badge-discount">
+          -15%
+        </span>
+
+        {imgSrc ? (
+          <img
+            src={imgSrc}
+            className="product-card-img"
+            alt={p.name}
+            loading="lazy"
+          />
+        ) : (
+          <div className="d-flex align-items-center justify-content-center text-muted" style={{ fontSize: '3.5rem' }}>
+            📱
+          </div>
+        )}
+      </div>
+
+      {/* CARD BODY */}
+      <div className="product-card-body">
+        {/* INSTALLMENT PILL */}
+        <div className="product-installment-tag">
+          <span>💳</span> Trả góp 0%
+        </div>
+
+        <h3
+          className="product-card-title"
+          title={p.name}
+        >
+          {p.name}
+        </h3>
+
+        <div className="product-card-meta">
+          <span className="product-rating-badge">
+            ★ {p.rating ? p.rating.toFixed(1) : '5.0'}
+          </span>
+          <span className="text-muted small d-flex align-items-center gap-1">
+            {p.quantity > 0 ? (
+              <>
+                <span className="status-dot-pulse online"></span>
+                <span className="text-success fw-semibold ms-1">Còn hàng</span>
+              </>
+            ) : (
+              <>
+                <span className="status-dot-pulse offline"></span>
+                <span className="text-danger fw-semibold ms-1">Tạm hết</span>
+              </>
+            )}
+          </span>
+        </div>
+
+        {/* PRICE & INSTALLMENT */}
+        <div className="product-card-price-wrap">
+          <div className="product-card-price">
+            {p.price ? p.price.toLocaleString('vi-VN') : 0} ₫
+          </div>
+          {installmentPerMonth > 0 && (
+            <div className="product-card-installment-text">
+              Trả góp chỉ từ <strong>{installmentPerMonth.toLocaleString('vi-VN')}₫</strong>/tháng
             </div>
           )}
-
-          <div className="card-body d-flex flex-column">
-            <h5
-              className="card-title text-truncate"
-              title={p.name}
-              style={{
-                fontSize: '0.95rem',
-                fontWeight: '600',
-                color: 'var(--primary)',
-              }}
-            >
-              {p.name}
-            </h5>
-
-            <div className="d-flex justify-content-between align-items-center mb-2 small">
-              <span className="text-muted" style={{ fontSize: '0.85rem' }}>
-                {p.brand}
-              </span>
-              <span
-                className="badge bg-light text-dark"
-                style={{
-                  fontSize: '0.8rem',
-                  fontWeight: '600',
-                }}
-              >
-                ★ {p.rating?.toFixed(1) || 0}
-              </span>
-            </div>
-
-            <p className="fw-bold text-primary mb-2 mt-auto" style={{ fontSize: '1.15rem' }}>
-              {p.price.toLocaleString('vi-VN')} ₫
-            </p>
-
-            <button
-              type="button"
-              className="btn btn-outline-primary btn-sm fw-bold"
-              style={{
-                transition: 'all 0.3s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'var(--accent)';
-                e.target.style.color = '#fff';
-                e.target.style.borderColor = 'var(--accent)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'transparent';
-                e.target.style.color = 'var(--accent)';
-                e.target.style.borderColor = 'var(--accent)';
-              }}
-            >
-              👁️ Xem chi tiết
-            </button>
-          </div>
         </div>
-      </Link>
-    </div>
+
+        {/* ACTION BUTTON */}
+        <div className="product-card-btn btn-shine">
+          <span>Xem chi tiết →</span>
+        </div>
+      </div>
+    </Link>
   );
 }

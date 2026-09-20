@@ -1,6 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/axios.js';
 
+// Import real promotional banner images from assets/images
+import ip16Img from '../../assets/images/ip16.jpeg';
+import s24Img from '../../assets/images/ssS24.jpg';
+import flashsaleImg from '../../assets/images/flashsale.jpg';
+
+const DEFAULT_BANNERS = [
+  {
+    _id: 'default-1',
+    imageUrl: ip16Img,
+    title: 'iPhone 16 Pro | Pro Max - Giá Tốt Nhất',
+    link: '/?brand=Apple',
+    duration: 5000,
+  },
+  {
+    _id: 'default-2',
+    imageUrl: s24Img,
+    title: 'Samsung Galaxy S24 Ultra - Đỉnh Cao Công Nghệ',
+    link: '/?brand=Samsung',
+    duration: 5000,
+  },
+  {
+    _id: 'default-3',
+    imageUrl: flashsaleImg,
+    title: 'Đại Tiệc Flash Sale Giảm Đến 40%',
+    link: '/',
+    duration: 5000,
+  },
+];
+
 export default function BannerSlider() {
   const [banners, setBanners] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,88 +51,86 @@ export default function BannerSlider() {
     loadBanners();
   }, []);
 
+  const activeBanners = banners && banners.length > 0 ? banners : DEFAULT_BANNERS;
+
   // Auto slide with dynamic duration per banner
   useEffect(() => {
-    if (!isAutoPlaying || banners.length <= 1) return;
+    if (!isAutoPlaying || activeBanners.length <= 1) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => {
-        const nextIndex = (prev + 1) % banners.length;
-        setCurrentDuration(banners[nextIndex].duration || 5000);
+        const nextIndex = (prev + 1) % activeBanners.length;
+        setCurrentDuration(activeBanners[nextIndex].duration || 5000);
         return nextIndex;
       });
     }, currentDuration);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, banners.length, currentDuration]);
+  }, [isAutoPlaying, activeBanners.length, currentDuration]);
 
   const goToSlide = (index) => {
     setCurrentIndex(index);
-    setCurrentDuration(banners[index].duration || 5000);
+    setCurrentDuration(activeBanners[index].duration || 5000);
     setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 10000); // Resume after 10s
+    setTimeout(() => setIsAutoPlaying(true), 10000);
   };
 
   const goToPrevious = () => {
-    const prevIndex = (currentIndex - 1 + banners.length) % banners.length;
+    const prevIndex = (currentIndex - 1 + activeBanners.length) % activeBanners.length;
     setCurrentIndex(prevIndex);
-    setCurrentDuration(banners[prevIndex].duration || 5000);
+    setCurrentDuration(activeBanners[prevIndex].duration || 5000);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
   };
 
   const goToNext = () => {
-    const nextIndex = (currentIndex + 1) % banners.length;
+    const nextIndex = (currentIndex + 1) % activeBanners.length;
     setCurrentIndex(nextIndex);
-    setCurrentDuration(banners[nextIndex].duration || 5000);
+    setCurrentDuration(activeBanners[nextIndex].duration || 5000);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
   };
 
-  if (!banners || banners.length === 0) {
-    return null;
-  }
-
   return (
     <div
-      className="banner-slider position-relative"
+      className="position-relative overflow-hidden mb-4"
       style={{
-        width: '100%',
-        height: 'auto',
-        overflow: 'hidden',
-        borderRadius: '12px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-        marginBottom: '3rem',
+        borderRadius: 'var(--radius-2xl)',
+        boxShadow: 'var(--shadow-lg)',
+        border: '1px solid rgba(226, 232, 240, 0.8)',
+        backgroundColor: '#0f172a',
       }}
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
       {/* Slides Container */}
       <div
-        className="slides-wrapper d-flex"
+        className="d-flex"
         style={{
           transform: `translateX(-${currentIndex * 100}%)`,
-          transition: 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {banners.map((banner, index) => (
+        {activeBanners.map((banner) => (
           <div
             key={banner._id}
-            className="slide"
             style={{
               minWidth: '100%',
-              height: '100%',
               position: 'relative',
+              backgroundColor: '#0f172a',
             }}
           >
             {banner.link ? (
-              <a href={banner.link} style={{ display: 'block', height: '100%' }}>
+              <a href={banner.link} style={{ display: 'block', width: '100%' }}>
                 <img
                   src={banner.imageUrl}
-                  alt={banner.title}
+                  alt={banner.title || 'Khuyến mãi Phone DZ'}
                   style={{
                     width: '100%',
                     height: 'auto',
+                    maxHeight: '440px',
+                    minHeight: '220px',
+                    objectFit: 'cover',
                     display: 'block',
                   }}
                 />
@@ -111,10 +138,13 @@ export default function BannerSlider() {
             ) : (
               <img
                 src={banner.imageUrl}
-                alt={banner.title}
+                alt={banner.title || 'Khuyến mãi Phone DZ'}
                 style={{
                   width: '100%',
                   height: 'auto',
+                  maxHeight: '440px',
+                  minHeight: '220px',
+                  objectFit: 'cover',
                   display: 'block',
                 }}
               />
@@ -124,47 +154,64 @@ export default function BannerSlider() {
       </div>
 
       {/* Navigation Arrows */}
-      {banners.length > 1 && (
+      {activeBanners.length > 1 && (
         <>
           <button
             onClick={goToPrevious}
-            className="btn btn-light position-absolute top-50 start-0 translate-middle-y ms-3"
+            className="btn position-absolute top-50 start-0 translate-middle-y ms-3 d-flex align-items-center justify-content-center"
             style={{
-              width: '36px',
-              height: '36px',
+              width: '44px',
+              height: '44px',
               borderRadius: '50%',
-              opacity: 0.7,
-              border: 'none',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+              background: 'rgba(15, 23, 42, 0.65)',
+              backdropFilter: 'blur(8px)',
+              color: '#ffffff',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
               zIndex: 10,
-              fontSize: '1.2rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              fontSize: '1.4rem',
+              transition: 'all 0.2s ease',
+              padding: 0,
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.7')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(79, 70, 229, 0.9)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.65)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            }}
+            aria-label="Previous Slide"
           >
             ‹
           </button>
+
           <button
             onClick={goToNext}
-            className="btn btn-light position-absolute top-50 end-0 translate-middle-y me-3"
+            className="btn position-absolute top-50 end-0 translate-middle-y me-3 d-flex align-items-center justify-content-center"
             style={{
-              width: '36px',
-              height: '36px',
+              width: '44px',
+              height: '44px',
               borderRadius: '50%',
-              opacity: 0.7,
-              border: 'none',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+              background: 'rgba(15, 23, 42, 0.65)',
+              backdropFilter: 'blur(8px)',
+              color: '#ffffff',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
               zIndex: 10,
-              fontSize: '1.2rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              fontSize: '1.4rem',
+              transition: 'all 0.2s ease',
+              padding: 0,
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.7')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(79, 70, 229, 0.9)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(15, 23, 42, 0.65)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            }}
+            aria-label="Next Slide"
           >
             ›
           </button>
@@ -172,26 +219,35 @@ export default function BannerSlider() {
       )}
 
       {/* Dots Indicator */}
-      {banners.length > 1 && (
+      {activeBanners.length > 1 && (
         <div
-          className="position-absolute bottom-0 start-50 translate-middle-x mb-2"
+          className="position-absolute bottom-0 start-50 translate-middle-x mb-3"
           style={{ zIndex: 10 }}
         >
-          <div className="d-flex gap-2">
-            {banners.map((_, index) => (
+          <div
+            className="d-flex align-items-center gap-2 px-3 py-1"
+            style={{
+              background: 'rgba(15, 23, 42, 0.55)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: 'var(--radius-full)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+            }}
+          >
+            {activeBanners.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className="btn btn-sm p-0"
                 style={{
-                  width: '8px',
+                  width: currentIndex === index ? '26px' : '8px',
                   height: '8px',
-                  borderRadius: '50%',
-                  background: currentIndex === index ? 'white' : 'rgba(255,255,255,0.4)',
+                  borderRadius: 'var(--radius-full)',
+                  background: currentIndex === index ? '#ffffff' : 'rgba(255,255,255,0.4)',
                   border: 'none',
-                  transition: 'all 0.3s',
+                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                   cursor: 'pointer',
+                  padding: 0,
                 }}
+                aria-label={`Slide ${index + 1}`}
               />
             ))}
           </div>

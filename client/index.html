@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Phone Shop</title>
+    <title>Phone DZ - Cửa hàng điện thoại & phụ kiện chính hãng</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
       // Suppress Dialogflow Messenger internal errors
       window.addEventListener('error', function(e) {
@@ -20,29 +23,29 @@
       df-messenger {
         z-index: 999;
         position: fixed;
-        --df-messenger-font-color: #000;
-        --df-messenger-font-family: Google Sans;
-        --df-messenger-chat-background: #f3f6fc;
-        --df-messenger-message-user-background: #d3e3fd;
-        --df-messenger-message-bot-background: #fff;
-        --df-messenger-button-titlebar-color: #1976d2;
-        --df-messenger-button-titlebar-font-color: #fff;
-        bottom: 16px;
-        right: 16px;
+        --df-messenger-font-color: #0f172a;
+        --df-messenger-font-family: 'Plus Jakarta Sans', sans-serif;
+        --df-messenger-chat-background: #f8fafc;
+        --df-messenger-message-user-background: #e0e7ff;
+        --df-messenger-message-bot-background: #ffffff;
+        --df-messenger-button-titlebar-color: #4f46e5;
+        --df-messenger-button-titlebar-font-color: #ffffff;
+        bottom: 20px;
+        right: 20px;
       }
       
       /* Làm nổi bật icon chatbot */
       df-messenger::part(chat-bubble-button) {
-        width: 70px;
-        height: 70px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: 3px solid #fff;
+        width: 64px;
+        height: 64px;
+        box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border: 2px solid rgba(255, 255, 255, 0.8);
       }
       
       df-messenger::part(chat-bubble-button):hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        transform: scale(1.08) translateY(-2px);
+        box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.5);
       }
       
       /* Animation cho icon */
@@ -51,12 +54,12 @@
           transform: scale(1);
         }
         50% {
-          transform: scale(1.05);
+          transform: scale(1.04);
         }
       }
       
       df-messenger::part(chat-bubble-button) {
-        animation: pulse 2s ease-in-out infinite;
+        animation: pulse 2.5s ease-in-out infinite;
       }
       
       /* Container chứa các nút chat */
@@ -154,7 +157,7 @@
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease;
-        font-family: 'Google Sans', sans-serif;
+        font-family: 'Plus Jakarta Sans', sans-serif;
       }
       
       .chat-button:hover::after {

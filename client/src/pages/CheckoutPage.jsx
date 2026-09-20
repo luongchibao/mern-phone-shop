@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
@@ -12,6 +12,8 @@ export default function CheckoutPage() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     reset,
     formState: { isSubmitting },
   } = useForm({
@@ -26,6 +28,8 @@ export default function CheckoutPage() {
       paymentMethod: 'COD',
     },
   });
+
+  const selectedPaymentMethod = watch('paymentMethod');
 
   useEffect(() => {
     if (user) {
@@ -71,8 +75,8 @@ export default function CheckoutPage() {
         paymentMethod: values.paymentMethod,
       };
 
-      const { data } = await api.post('/orders', payload);
-      alert('✓ Đặt hàng thành công!');
+      await api.post('/orders', payload);
+      alert('✓ Đặt hàng thành công! Đơn hàng của bạn đã được ghi nhận.');
       navigate('/profile');
     } catch (err) {
       console.error(err);
@@ -82,13 +86,14 @@ export default function CheckoutPage() {
 
   if (!user) {
     return (
-      <div className="container my-5">
-        <div className="alert alert-warning" role="alert">
-          <strong>⚠️ Cần đăng nhập:</strong> Bạn cần{' '}
-          <Link to="/login" className="alert-link">
-            đăng nhập
-          </Link>{' '}
-          trước khi thanh toán.
+      <div className="container my-5 py-5 text-center">
+        <div className="alert alert-warning p-5 rounded-4 shadow-sm" style={{ maxWidth: '500px', margin: '0 auto' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
+          <h4 className="fw-bold mb-2">Yêu cầu đăng nhập</h4>
+          <p className="text-muted mb-4">Bạn cần đăng nhập tài khoản trước khi tiến hành thanh toán đơn hàng.</p>
+          <Link to="/login" className="btn btn-primary px-4 py-2 fw-bold">
+            Đăng nhập ngay
+          </Link>
         </div>
       </div>
     );
@@ -96,11 +101,12 @@ export default function CheckoutPage() {
 
   if (!items || items.length === 0) {
     return (
-      <div className="container my-5">
-        <h1 className="h3 mb-4">🛒 Thanh toán</h1>
-        <div className="alert alert-info text-center py-5" role="alert">
-          <h5 className="mb-2">Giỏ hàng đang trống</h5>
-          <Link to="/" className="btn btn-primary btn-sm">
+      <div className="container my-5 py-5 text-center">
+        <div className="p-5 bg-white border rounded-4 shadow-sm" style={{ maxWidth: '500px', margin: '0 auto' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
+          <h4 className="fw-bold mb-2">Giỏ hàng trống</h4>
+          <p className="text-muted mb-4">Vui lòng chọn sản phẩm vào giỏ hàng trước khi thanh toán.</p>
+          <Link to="/" className="btn btn-primary px-4 py-2">
             ← Tiếp tục mua sắm
           </Link>
         </div>
@@ -109,190 +115,266 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="container my-5">
-      <h1 className="h3 fw-bold mb-4" style={{ color: 'var(--primary)' }}>
-        🛒 Thanh toán
-      </h1>
+    <div className="container my-4 my-md-5">
+      {/* CHECKOUT PROGRESS BAR */}
+      <div className="checkout-step-bar">
+        <div className="step-item">
+          <span className="step-number" style={{ background: '#10b981', color: '#fff' }}>✓</span>
+          <span>Giỏ hàng</span>
+        </div>
+        <div style={{ width: '40px', height: '2px', background: 'var(--primary)' }} />
+        <div className="step-item active">
+          <span className="step-number">2</span>
+          <span>Địa chỉ &amp; Thanh toán</span>
+        </div>
+        <div style={{ width: '40px', height: '2px', background: '#e2e8f0' }} />
+        <div className="step-item">
+          <span className="step-number">3</span>
+          <span>Hoàn tất</span>
+        </div>
+      </div>
 
-      <div className="row g-4">
-        {/* FORM */}
-        <div className="col-12 col-lg-7">
-          <div className="card border-0 shadow-sm">
-            <div className="card-header bg-light border-bottom py-3">
-              <h5 className="card-title mb-0 fw-bold">Địa chỉ giao hàng</h5>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="row g-4">
+          {/* LEFT: SHIPPING & PAYMENT DETAILS */}
+          <div className="col-12 col-lg-7">
+            {/* SHIPPING ADDRESS CARD */}
+            <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+              <h5 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2 pb-2 border-bottom">
+                <span>📍</span> Thông tin nhận hàng
+              </h5>
+
+              <div className="row g-3">
+                <div className="col-12 col-md-6">
+                  <label className="form-label">Họ và tên người nhận *</label>
+                  <input
+                    className="form-control"
+                    placeholder="Nguyễn Văn A"
+                    {...register('fullName', { required: true })}
+                  />
+                </div>
+
+                <div className="col-12 col-md-6">
+                  <label className="form-label">Số điện thoại *</label>
+                  <input
+                    className="form-control"
+                    placeholder="0912 345 678"
+                    {...register('phone', { required: true })}
+                  />
+                </div>
+
+                <div className="col-12">
+                  <label className="form-label">Địa chỉ chi tiết (Số nhà, tên đường) *</label>
+                  <input
+                    className="form-control"
+                    placeholder="Số 123 Đường Lê Lợi"
+                    {...register('street', { required: true })}
+                  />
+                </div>
+
+                <div className="col-12 col-md-4">
+                  <label className="form-label">Phường / Xã *</label>
+                  <input
+                    className="form-control"
+                    placeholder="Phường Bến Nghé"
+                    {...register('ward', { required: true })}
+                  />
+                </div>
+
+                <div className="col-12 col-md-4">
+                  <label className="form-label">Quận / Huyện *</label>
+                  <input
+                    className="form-control"
+                    placeholder="Quận 1"
+                    {...register('district', { required: true })}
+                  />
+                </div>
+
+                <div className="col-12 col-md-4">
+                  <label className="form-label">Tỉnh / Thành phố *</label>
+                  <input
+                    className="form-control"
+                    placeholder="Hồ Chí Minh"
+                    {...register('city', { required: true })}
+                  />
+                </div>
+
+                <div className="col-12 col-md-6">
+                  <label className="form-label">Mã bưu điện (Tùy chọn)</label>
+                  <input
+                    className="form-control"
+                    placeholder="700000"
+                    {...register('postalCode')}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="card-body">
-              <form className="vstack gap-3" onSubmit={handleSubmit(onSubmit)}>
-                <div className="row g-3">
-                  <div className="col-12 col-md-6">
-                    <label className="form-label fw-bold small">Họ tên *</label>
-                    <input
-                      className="form-control"
-                      {...register('fullName', { required: true })}
-                      placeholder="Nguyễn Văn A"
-                    />
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <label className="form-label fw-bold small">Số điện thoại *</label>
-                    <input
-                      className="form-control"
-                      {...register('phone', { required: true })}
-                      placeholder="0123456789"
-                    />
-                  </div>
-                  <div className="col-12">
-                    <label className="form-label fw-bold small">Địa chỉ chi tiết *</label>
-                    <input
-                      className="form-control"
-                      {...register('street', { required: true })}
-                      placeholder="Số nhà, tên đường..."
-                    />
-                  </div>
-                  <div className="col-6 col-md-4">
-                    <label className="form-label fw-bold small">Phường/Xã</label>
-                    <input
-                      className="form-control"
-                      {...register('ward')}
-                      placeholder="Phường..."
-                    />
-                  </div>
-                  <div className="col-6 col-md-4">
-                    <label className="form-label fw-bold small">Quận/Huyện</label>
-                    <input
-                      className="form-control"
-                      {...register('district')}
-                      placeholder="Quận..."
-                    />
-                  </div>
-                  <div className="col-6 col-md-4">
-                    <label className="form-label fw-bold small">Tỉnh/Thành phố</label>
-                    <input
-                      className="form-control"
-                      {...register('city')}
-                      placeholder="TP.HCM..."
-                    />
-                  </div>
-                  <div className="col-6 col-md-4">
-                    <label className="form-label fw-bold small">Mã bưu chính</label>
-                    <input
-                      className="form-control"
-                      {...register('postalCode')}
-                      placeholder="700000"
-                    />
-                  </div>
-                </div>
 
-                <hr />
+            {/* PAYMENT METHOD CARD */}
+            <div className="card border-0 shadow-sm rounded-4 p-4 bg-white">
+              <h5 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2 pb-2 border-bottom">
+                <span>💳</span> Phương thức thanh toán
+              </h5>
 
-                <div>
-                  <h6 className="fw-bold mb-3">💳 Phương thức thanh toán</h6>
-                  <div className="form-check mb-2">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      value="COD"
-                      id="payCOD"
-                      {...register('paymentMethod')}
-                      defaultChecked
-                    />
-                    <label className="form-check-label" htmlFor="payCOD">
-                      <strong>Thanh toán khi nhận hàng (COD)</strong>
-                      <br />
-                      <small className="text-muted">
-                        Thanh toán trực tiếp cho người giao hàng
-                      </small>
-                    </label>
-                  </div>
-                  <div className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      value="Stripe"
-                      id="payStripe"
-                      {...register('paymentMethod')}
-                    />
-                    <label className="form-check-label" htmlFor="payStripe">
-                      <strong>Thanh toán trực tuyến (Stripe)</strong>
-                      <br />
-                      <small className="text-muted">
-                        Thanh toán bằng thẻ tín dụng hoặc ví điện tử
-                      </small>
-                    </label>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-success btn-lg w-100 fw-bold mt-4"
-                  disabled={isSubmitting}
+              <div className="d-flex flex-column gap-3">
+                {/* COD OPTION */}
+                <div
+                  className={`payment-method-card ${selectedPaymentMethod === 'COD' ? 'selected' : ''}`}
+                  onClick={() => setValue('paymentMethod', 'COD')}
                 >
-                  {isSubmitting ? '⏳ Đang xử lý...' : '✓ Đặt hàng'}
-                </button>
+                  <input
+                    type="radio"
+                    value="COD"
+                    {...register('paymentMethod')}
+                    id="payCOD"
+                    className="form-check-input"
+                  />
+                  <div className="flex-grow-1">
+                    <label htmlFor="payCOD" className="fw-bold text-dark d-block mb-0 cursor-pointer">
+                      💵 Thanh toán tiền mặt khi nhận hàng (COD)
+                    </label>
+                    <small className="text-muted d-block mt-1">
+                      Kiểm tra máy và thanh toán tiền mặt trực tiếp cho nhân viên giao hàng.
+                    </small>
+                  </div>
+                </div>
 
-                <p className="text-center text-muted small mt-3 mb-0">
-                  Bằng việc nhấn "Đặt hàng", bạn đồng ý với chính sách mua hàng
-                </p>
-              </form>
+                {/* BANK TRANSFER OPTION */}
+                <div
+                  className={`payment-method-card ${selectedPaymentMethod === 'BANKING' ? 'selected' : ''}`}
+                  onClick={() => setValue('paymentMethod', 'BANKING')}
+                >
+                  <input
+                    type="radio"
+                    value="BANKING"
+                    {...register('paymentMethod')}
+                    id="payBanking"
+                    className="form-check-input"
+                  />
+                  <div className="flex-grow-1">
+                    <label htmlFor="payBanking" className="fw-bold text-dark d-block mb-0 cursor-pointer">
+                      🏦 Chuyển khoản ngân hàng (VietQR / Internet Banking)
+                    </label>
+                    <small className="text-muted d-block mt-1">
+                      Quét mã VietQR nhanh chóng, miễn phí giao dịch 24/7.
+                    </small>
+                  </div>
+                </div>
+
+                {/* VNPAY OPTION */}
+                <div
+                  className={`payment-method-card ${selectedPaymentMethod === 'VNPAY' ? 'selected' : ''}`}
+                  onClick={() => setValue('paymentMethod', 'VNPAY')}
+                >
+                  <input
+                    type="radio"
+                    value="VNPAY"
+                    {...register('paymentMethod')}
+                    id="payVnpay"
+                    className="form-check-input"
+                  />
+                  <div className="flex-grow-1">
+                    <label htmlFor="payVnpay" className="fw-bold text-dark d-block mb-0 cursor-pointer">
+                      📱 Cổng thanh toán VNPAY-QR / Ví Điện Tử
+                    </label>
+                    <small className="text-muted d-block mt-1">
+                      Hỗ trợ tất cả ứng dụng ngân hàng và ví điện tử, chiết khấu lên đến 100k.
+                    </small>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* SUMMARY */}
-        <div className="col-12 col-lg-5">
-          <div className="card border-0 shadow-sm">
-            <div className="card-header bg-light border-bottom py-3">
-              <h5 className="card-title mb-0 fw-bold">📋 Tóm tắt đơn hàng</h5>
-            </div>
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-sm mb-3">
-                  <tbody>
-                    {items.map((i) => (
-                      <tr key={i.product} className="border-bottom">
-                        <td className="py-2">
-                          <small className="fw-semibold d-block">{i.name}</small>
-                          <small className="text-muted">x{i.qty}</small>
-                        </td>
-                        <td className="text-end py-2">
-                          <small className="fw-bold text-primary">
-                            {(i.price * i.qty).toLocaleString('vi-VN')} ₫
-                          </small>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          {/* RIGHT: ORDER SUMMARY (STICKY) */}
+          <div className="col-12 col-lg-5">
+            <div className="summary-sticky-card">
+              <h5 className="fw-bold text-dark mb-3 pb-2 border-bottom">
+                Đơn hàng ({items.length} sản phẩm)
+              </h5>
+
+              {/* PRODUCTS PREVIEW */}
+              <div className="overflow-auto pe-1 mb-3" style={{ maxHeight: '240px' }}>
+                {items.map((i) => (
+                  <div key={i.product} className="d-flex align-items-center gap-3 py-2 border-bottom">
+                    <div
+                      style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: 'var(--radius-sm)',
+                        background: '#f8fafc',
+                        border: '1px solid var(--border)',
+                        padding: '0.2rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {i.image ? (
+                        <img
+                          src={i.image}
+                          alt={i.name}
+                          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                        />
+                      ) : (
+                        <span>📱</span>
+                      )}
+                    </div>
+                    <div className="flex-grow-1 small">
+                      <div className="fw-semibold text-dark text-truncate" style={{ maxWidth: '180px' }}>
+                        {i.name}
+                      </div>
+                      <span className="text-muted">SL: {i.qty}</span>
+                    </div>
+                    <div className="text-end small fw-bold text-dark">
+                      {(i.price * i.qty).toLocaleString('vi-VN')} ₫
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div className="border-top pt-3">
-                <div className="d-flex justify-content-between mb-2 small">
-                  <span className="text-muted">Tạm tính:</span>
-                  <span className="fw-bold">{subtotal.toLocaleString('vi-VN')} ₫</span>
-                </div>
-                <div className="d-flex justify-content-between mb-2 small">
-                  <span className="text-muted">Phí vận chuyển:</span>
-                  <span className="fw-bold">{shippingFee.toLocaleString('vi-VN')} ₫</span>
-                </div>
-                <div className="d-flex justify-content-between mb-3 small border-bottom pb-3">
-                  <span className="text-muted">Thuế (10%):</span>
-                  <span className="fw-bold">{tax.toLocaleString('vi-VN')} ₫</span>
-                </div>
+              {/* TOTALS */}
+              <div className="d-flex justify-content-between mb-2 small">
+                <span className="text-muted">Tạm tính hàng:</span>
+                <strong className="text-dark">{subtotal.toLocaleString('vi-VN')} ₫</strong>
+              </div>
 
-                <div className="d-flex justify-content-between mb-4">
-                  <span className="h6 fw-bold mb-0">Tổng cộng:</span>
-                  <span className="h6 fw-bold text-primary mb-0">
+              <div className="d-flex justify-content-between mb-2 small">
+                <span className="text-muted">Phí giao hàng:</span>
+                <strong className="text-dark">{shippingFee.toLocaleString('vi-VN')} ₫</strong>
+              </div>
+
+              <div className="d-flex justify-content-between mb-3 small">
+                <span className="text-muted">Thuế VAT (10%):</span>
+                <strong className="text-dark">{tax.toLocaleString('vi-VN')} ₫</strong>
+              </div>
+
+              <div className="p-3 bg-light rounded-3 mb-3 border">
+                <div className="d-flex justify-content-between align-items-baseline">
+                  <span className="fw-bold text-dark">Tổng thanh toán:</span>
+                  <span className="h4 fw-bold text-primary mb-0">
                     {total.toLocaleString('vi-VN')} ₫
                   </span>
                 </div>
               </div>
 
-              <Link to="/cart" className="btn btn-link btn-sm p-0 text-decoration-none">
-                ← Quay lại giỏ hàng
-              </Link>
+              <button
+                type="submit"
+                className="btn btn-glow w-100 py-3 fw-bold mb-3"
+                disabled={isSubmitting}
+                style={{ fontSize: '1rem', borderRadius: 'var(--radius-lg)' }}
+              >
+                {isSubmitting ? '⏳ Đang xử lý đơn hàng...' : '✓ Xác Nhận Đặt Hàng'}
+              </button>
+
+              <div className="text-center small text-muted">
+                Bằng việc bấm đặt hàng, bạn đồng ý với các <Link to="/">Điều khoản</Link> của Phone DZ.
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

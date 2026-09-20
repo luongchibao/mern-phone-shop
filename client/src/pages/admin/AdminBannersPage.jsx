@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import api from '../../api/axios.js';
+import AdminNav from '../../components/AdminNav.jsx';
 
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState([]);
@@ -58,13 +58,6 @@ export default function AdminBannersPage() {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingBanner(null);
-    setFormData({
-      imageUrl: '',
-      link: '',
-      order: 0,
-      isActive: true,
-      duration: 5000,
-    });
   };
 
   const handleSubmit = async (e) => {
@@ -101,11 +94,11 @@ export default function AdminBannersPage() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('image', file);
+    const fd = new FormData();
+    fd.append('image', file);
 
     try {
-      const { data } = await api.post('/upload', formData, {
+      const { data } = await api.post('/upload', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setFormData((prev) => ({ ...prev, imageUrl: data.url }));
@@ -117,66 +110,90 @@ export default function AdminBannersPage() {
   };
 
   return (
-    <div className="container my-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="h3 fw-bold" style={{ color: 'var(--primary)' }}>
-          🎨 Quản lý Banners
-        </h1>
+    <div className="container my-4 my-md-5">
+      {/* HEADER */}
+      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <div>
+          <h1 className="h3 fw-bold mb-1 text-dark">
+            🎨 Quản Lý Banners
+          </h1>
+          <p className="text-muted small mb-0">
+            Tùy chỉnh hình ảnh banner quảng cáo trên trang chủ, link liên kết và thời gian trượt
+          </p>
+        </div>
         <button
-          className="btn btn-primary"
+          className="btn btn-primary btn-sm px-3 py-2 fw-bold"
           onClick={() => handleOpenModal()}
+          style={{ borderRadius: 'var(--radius-md)' }}
         >
-          + Thêm Banner
+          + Thêm Banner Mới
         </button>
       </div>
 
+      {/* ADMIN SUBNAV */}
+      <AdminNav />
+
       {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
+        <div className="text-center py-5 my-5">
+          <div className="spinner-border text-primary spinner-border-sm" role="status">
+            <span className="visually-hidden">Đang tải...</span>
           </div>
+          <p className="mt-3 text-muted">Đang tải danh sách banner...</p>
         </div>
       ) : banners.length === 0 ? (
-        <div className="alert alert-info text-center py-5" role="alert">
-          <h5 className="mb-3">Chưa có banner nào</h5>
-          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-            Thêm Banner đầu tiên
+        <div className="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🖼️</div>
+          <h5 className="fw-bold mb-2">Chưa có banner nào</h5>
+          <p className="text-muted small mb-3">Tạo banner đầu tiên để hiển thị trên slider trang chủ.</p>
+          <button className="btn btn-primary btn-sm px-3" onClick={() => handleOpenModal()}>
+            + Thêm Banner Đầu Tiên
           </button>
         </div>
       ) : (
-        <div className="card border-0 shadow-sm">
-          <div className="card-body p-0">
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+          <div className="p-3 bg-light border-bottom">
+            <h5 className="h6 fw-bold mb-0 text-dark">
+              Danh sách banners ({banners.length})
+            </h5>
+          </div>
+
+          <div className="p-0">
             <div className="table-responsive">
-              <table className="table align-middle mb-0">
-                <thead className="table-light">
+              <table className="table table-hover align-middle mb-0">
+                <thead className="table-light small">
                   <tr>
-                    <th style={{ width: '100px' }}>Thứ tự</th>
-                    <th style={{ width: '200px' }}>Ảnh</th>
-                    <th style={{ width: '150px' }}>Link</th>
-                    <th style={{ width: '120px' }}>Thời gian (s)</th>
-                    <th style={{ width: '100px' }}>Trạng thái</th>
-                    <th className="text-end" style={{ width: '150px' }}>
-                      Hành động
-                    </th>
+                    <th style={{ width: '80px' }}>Thứ tự</th>
+                    <th style={{ width: '220px' }}>Ảnh xem trước</th>
+                    <th>Link liên kết</th>
+                    <th className="text-center">Thời gian</th>
+                    <th className="text-center">Trạng thái</th>
+                    <th className="text-end" style={{ width: '130px' }}>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
                   {banners.map((banner) => (
-                    <tr key={banner._id} className="border-bottom">
+                    <tr key={banner._id}>
                       <td>
-                        <span className="badge bg-secondary">{banner.order}</span>
+                        <span className="badge bg-light text-dark border fw-bold">
+                          #{banner.order}
+                        </span>
                       </td>
                       <td>
-                        <img
-                          src={banner.imageUrl}
-                          alt={banner.title}
+                        <div
                           style={{
-                            width: '100%',
-                            height: '60px',
-                            objectFit: 'cover',
-                            borderRadius: '5px',
+                            borderRadius: 'var(--radius-sm)',
+                            overflow: 'hidden',
+                            border: '1px solid var(--border)',
+                            maxHeight: '70px',
+                            background: '#0f172a',
                           }}
-                        />
+                        >
+                          <img
+                            src={banner.imageUrl}
+                            alt={banner.title || 'Banner'}
+                            style={{ width: '100%', height: '65px', objectFit: 'cover' }}
+                          />
+                        </div>
                       </td>
                       <td>
                         {banner.link ? (
@@ -184,37 +201,42 @@ export default function AdminBannersPage() {
                             href={banner.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-decoration-none"
+                            className="text-primary text-decoration-none small text-truncate d-inline-block"
+                            style={{ maxWidth: '200px' }}
                           >
-                            🔗 Link
+                            🔗 {banner.link}
                           </a>
                         ) : (
-                          <span className="text-muted">—</span>
+                          <span className="text-muted small">— Không đặt link</span>
                         )}
                       </td>
-                      <td>
-                        <span className="badge bg-info">
+                      <td className="text-center">
+                        <span className="badge bg-info bg-opacity-10 text-info border border-info small">
                           {(banner.duration / 1000).toFixed(1)}s
                         </span>
                       </td>
-                      <td>
+                      <td className="text-center">
                         <span
                           className={`badge ${
-                            banner.isActive ? 'bg-success' : 'bg-secondary'
+                            banner.isActive
+                              ? 'bg-success bg-opacity-10 text-success'
+                              : 'bg-secondary bg-opacity-10 text-secondary'
                           }`}
                         >
-                          {banner.isActive ? '✓ Active' : '✕ Inactive'}
+                          {banner.isActive ? '✓ Hoạt động' : '✕ Tắt'}
                         </span>
                       </td>
                       <td className="text-end">
                         <button
-                          className="btn btn-sm btn-outline-primary me-2"
+                          className="btn btn-sm btn-outline-primary py-1 px-2 me-1"
+                          style={{ fontSize: '0.8rem' }}
                           onClick={() => handleOpenModal(banner)}
                         >
                           ✏️ Sửa
                         </button>
                         <button
-                          className="btn btn-sm btn-outline-danger"
+                          className="btn btn-sm btn-outline-danger py-1 px-2"
+                          style={{ fontSize: '0.8rem' }}
                           onClick={() => handleDelete(banner._id)}
                         >
                           🗑️ Xóa
@@ -229,33 +251,30 @@ export default function AdminBannersPage() {
         </div>
       )}
 
-      {/* ADD/EDIT MODAL */}
+      {/* MODAL */}
       {showModal && (
         <div
-          className="modal fade show"
-          style={{
-            display: 'block',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            overflowY: 'auto',
-          }}
+          className="modal fade show d-block"
+          style={{ backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)' }}
           tabIndex="-1"
         >
           <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content border-0 shadow">
-              <div className="modal-header bg-light border-bottom">
-                <h5 className="modal-title fw-bold">
-                  {editingBanner ? '✏️ Sửa Banner' : '+ Thêm Banner'}
+            <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+              <div className="p-4 border-bottom bg-light d-flex justify-content-between align-items-center">
+                <h5 className="modal-title fw-bold text-dark mb-0">
+                  {editingBanner ? '✏️ Chỉnh sửa Banner' : '➕ Thêm Banner Mới'}
                 </h5>
                 <button
                   type="button"
                   className="btn-close"
                   onClick={handleCloseModal}
+                  aria-label="Close"
                 ></button>
               </div>
               <form onSubmit={handleSubmit}>
-                <div className="modal-body">
+                <div className="p-4">
                   <div className="mb-3">
-                    <label className="form-label fw-bold">Ảnh Banner *</label>
+                    <label className="form-label small fw-bold">Hình ảnh Banner *</label>
                     <div className="input-group">
                       <input
                         type="text"
@@ -265,10 +284,10 @@ export default function AdminBannersPage() {
                           setFormData({ ...formData, imageUrl: e.target.value })
                         }
                         required
-                        placeholder="URL ảnh hoặc upload"
+                        placeholder="Nhập URL ảnh hoặc bấm Upload từ máy"
                       />
                       <label className="btn btn-outline-secondary">
-                        📁 Upload
+                        📁 Chọn file
                         <input
                           type="file"
                           className="d-none"
@@ -278,22 +297,22 @@ export default function AdminBannersPage() {
                       </label>
                     </div>
                     {formData.imageUrl && (
-                      <img
-                        src={formData.imageUrl}
-                        alt="Preview"
-                        className="mt-2"
-                        style={{
-                          width: '100%',
-                          maxHeight: '200px',
-                          objectFit: 'cover',
-                          borderRadius: '5px',
-                        }}
-                      />
+                      <div className="mt-2 p-2 border rounded-3 text-center bg-dark">
+                        <img
+                          src={formData.imageUrl}
+                          alt="Preview"
+                          style={{
+                            maxWidth: '100%',
+                            maxHeight: '180px',
+                            objectFit: 'contain',
+                          }}
+                        />
+                      </div>
                     )}
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-bold">Link (tùy chọn)</label>
+                    <label className="form-label small fw-bold">Link dẫn khi click vào banner (Tùy chọn)</label>
                     <input
                       type="text"
                       className="form-control"
@@ -301,33 +320,30 @@ export default function AdminBannersPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, link: e.target.value })
                       }
-                      placeholder="VD: /product/123 hoặc https://..."
+                      placeholder="VD: /?brand=Apple hoặc /product/64a..."
                     />
-                    <small className="text-muted">
-                      Link đến khi người dùng click banner
-                    </small>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">Thời gian hiển thị (giây)</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={formData.duration / 1000}
-                      onChange={(e) =>
-                        setFormData({ ...formData, duration: Number(e.target.value) * 1000 })
-                      }
-                      min="1"
-                      step="0.5"
-                    />
-                    <small className="text-muted">
-                      Thời gian banner này hiển thị trước khi chuyển sang banner tiếp theo
-                    </small>
-                  </div>
+                  <div className="row g-3">
+                    <div className="col-12 col-md-4">
+                      <label className="form-label small fw-bold">Thời gian trượt (giây)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={formData.duration / 1000}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            duration: Number(e.target.value) * 1000,
+                          })
+                        }
+                        min="1"
+                        step="0.5"
+                      />
+                    </div>
 
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Thứ tự</label>
+                    <div className="col-12 col-md-4">
+                      <label className="form-label small fw-bold">Thứ tự ưu tiên</label>
                       <input
                         type="number"
                         className="form-control"
@@ -337,40 +353,38 @@ export default function AdminBannersPage() {
                         }
                         min="0"
                       />
-                      <small className="text-muted">
-                        Banner có thứ tự nhỏ hơn hiển thị trước
-                      </small>
                     </div>
 
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Trạng thái</label>
+                    <div className="col-12 col-md-4">
+                      <label className="form-label small fw-bold">Trạng thái</label>
                       <div className="form-check form-switch mt-2">
                         <input
                           className="form-check-input"
                           type="checkbox"
+                          id="bannerActiveSwitch"
                           checked={formData.isActive}
                           onChange={(e) =>
                             setFormData({ ...formData, isActive: e.target.checked })
                           }
                         />
-                        <label className="form-check-label">
-                          {formData.isActive ? 'Active' : 'Inactive'}
+                        <label className="form-check-label small fw-bold" htmlFor="bannerActiveSwitch">
+                          {formData.isActive ? 'Đang kích hoạt' : 'Tạm ẩn'}
                         </label>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="modal-footer border-top">
+                <div className="p-3 bg-light border-top d-flex justify-content-end gap-2">
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-outline-secondary btn-sm"
                     onClick={handleCloseModal}
                   >
-                    Hủy
+                    Hủy bỏ
                   </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editingBanner ? '✓ Cập nhật' : '+ Thêm'}
+                  <button type="submit" className="btn btn-primary btn-sm px-3">
+                    {editingBanner ? '✓ Lưu thay đổi' : '+ Thêm mới'}
                   </button>
                 </div>
               </form>

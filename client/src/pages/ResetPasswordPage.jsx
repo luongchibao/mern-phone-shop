@@ -22,14 +22,14 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (password.length < 6) {
       setError('❌ Mật khẩu phải có ít nhất 6 ký tự');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('❌ Mật khẩu không khớp!');
+      setError('❌ Mật khẩu xác nhận không khớp!');
       return;
     }
 
@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
     setError('');
 
     try {
-      const { data } = await api.post('/auth/reset-password', { token, password });
+      await api.post('/auth/reset-password', { token, password });
       alert('✓ Đặt lại mật khẩu thành công! Vui lòng đăng nhập.');
       navigate('/login');
     } catch (err) {
@@ -49,101 +49,77 @@ export default function ResetPasswordPage() {
 
   if (!tokenValid) {
     return (
-      <div className="container my-5">
-        <div className="row justify-content-center">
-          <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
-            <div className="card border-0 shadow-sm">
-              <div className="card-body p-4 text-center">
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
-                <h1 className="h4 fw-bold mb-3 text-danger">
-                  Link không hợp lệ
-                </h1>
-                <p className="text-muted mb-4">
-                  Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
-                </p>
-                <Link to="/forgot-password" className="btn btn-primary">
-                  Gửi lại link mới
-                </Link>
-              </div>
-            </div>
-          </div>
+      <div className="auth-wrapper">
+        <div className="auth-glass-card text-center">
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
+          <h1 className="h4 fw-bold mb-2 text-danger">Link không hợp lệ</h1>
+          <p className="text-muted small mb-4">
+            Link đặt lại mật khẩu đã hết hạn hoặc không tồn tại. Vui lòng yêu cầu link mới.
+          </p>
+          <Link to="/forgot-password" className="btn btn-primary btn-sm px-4">
+            Yêu cầu link mới
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container my-5">
-      <div className="row justify-content-center">
-        <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body p-4">
-              <div className="text-center mb-4">
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔑</div>
-                <h1 className="h3 fw-bold mb-2" style={{ color: 'var(--primary)' }}>
-                  Đặt lại mật khẩu
-                </h1>
-                <p className="text-muted small">
-                  Nhập mật khẩu mới cho tài khoản của bạn
-                </p>
-              </div>
-
-              {error && (
-                <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                  {error}
-                  <button
-                    type="button"
-                    className="btn-close btn-sm"
-                    onClick={() => setError('')}
-                  ></button>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label fw-bold">Mật khẩu mới</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    minLength={6}
-                  />
-                  <small className="text-muted">Tối thiểu 6 ký tự</small>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label fw-bold">Nhập lại mật khẩu</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100 fw-bold py-2"
-                  disabled={loading}
-                >
-                  {loading ? '⏳ Đang xử lý...' : '✓ Đặt lại mật khẩu'}
-                </button>
-              </form>
-
-              <div className="text-center mt-4 pt-3 border-top">
-                <p className="text-muted mb-0 small">
-                  <Link to="/login" className="fw-bold text-primary text-decoration-none">
-                    ← Quay lại đăng nhập
-                  </Link>
-                </p>
-              </div>
-            </div>
+    <div className="auth-wrapper">
+      <div className="auth-glass-card">
+        <div className="text-center mb-4">
+          <div className="brand-icon-wrapper mx-auto mb-3" style={{ width: '54px', height: '54px', fontSize: '1.6rem' }}>
+            🔑
           </div>
+          <h1 className="h4 fw-bold text-dark mb-1">Đặt lại mật khẩu</h1>
+          <p className="text-muted small">Nhập mật khẩu mới cho tài khoản của bạn</p>
+        </div>
+
+        {error && (
+          <div className="alert alert-danger border-0 rounded-3 small p-3 mb-3">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label">Mật khẩu mới</label>
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Tối thiểu 6 ký tự"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Xác nhận mật khẩu mới</label>
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Nhập lại mật khẩu"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-glow w-100 py-2 fw-bold mt-2"
+            disabled={loading}
+            style={{ borderRadius: 'var(--radius-md)' }}
+          >
+            {loading ? '⏳ Đang lưu...' : 'Xác nhận đổi mật khẩu'}
+          </button>
+        </form>
+
+        <div className="text-center mt-4 pt-3 border-top">
+          <Link to="/login" className="small fw-semibold text-muted text-decoration-none">
+            ← Quay lại đăng nhập
+          </Link>
         </div>
       </div>
     </div>

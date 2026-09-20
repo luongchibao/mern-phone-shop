@@ -19,12 +19,11 @@ export default function ForgotPasswordPage() {
     try {
       const { data } = await api.post('/auth/forgot-password', { email });
       setMessage(data.message || '✓ Link đặt lại mật khẩu đã được gửi đến email của bạn!');
-      
-      // Show reset URL in dev mode
+
       if (data.resetUrl) {
         setResetUrl(data.resetUrl);
       }
-      
+
       setEmail('');
     } catch (err) {
       setError(err.response?.data?.message || '❌ Có lỗi xảy ra. Vui lòng thử lại!');
@@ -34,94 +33,66 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="container my-5">
-      <div className="row justify-content-center">
-        <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body p-4">
-              <div className="text-center mb-4">
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔐</div>
-                <h1 className="h3 fw-bold mb-2" style={{ color: 'var(--primary)' }}>
-                  Quên mật khẩu?
-                </h1>
-                <p className="text-muted small">
-                  Nhập email của bạn, chúng tôi sẽ gửi link đặt lại mật khẩu
-                </p>
-              </div>
-
-              {message && (
-                <div className="alert alert-success alert-dismissible fade show" role="alert">
-                  {message}
-                  <button
-                    type="button"
-                    className="btn-close btn-sm"
-                    onClick={() => setMessage('')}
-                  ></button>
-                </div>
-              )}
-
-              {resetUrl && (
-                <div className="alert alert-info" role="alert">
-                  <strong>🔗 Link đặt lại mật khẩu (Dev Mode):</strong>
-                  <div className="mt-2">
-                    <a 
-                      href={resetUrl} 
-                      className="btn btn-sm btn-primary w-100"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Nhấn vào đây để đặt lại mật khẩu
-                    </a>
-                  </div>
-                  <small className="text-muted d-block mt-2">
-                    Hoặc copy link: <code className="text-break">{resetUrl}</code>
-                  </small>
-                </div>
-              )}
-
-              {error && (
-                <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                  {error}
-                  <button
-                    type="button"
-                    className="btn-close btn-sm"
-                    onClick={() => setError('')}
-                  ></button>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label fw-bold">Email</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100 fw-bold py-2"
-                  disabled={loading}
-                >
-                  {loading ? '⏳ Đang gửi...' : '📧 Gửi link đặt lại'}
-                </button>
-              </form>
-
-              <div className="text-center mt-4 pt-3 border-top">
-                <p className="text-muted mb-0 small">
-                  Nhớ mật khẩu rồi?{' '}
-                  <Link to="/login" className="fw-bold text-primary text-decoration-none">
-                    Đăng nhập
-                  </Link>
-                </p>
-              </div>
-            </div>
+    <div className="auth-wrapper">
+      <div className="auth-glass-card">
+        <div className="text-center mb-4">
+          <div className="brand-icon-wrapper mx-auto mb-3" style={{ width: '54px', height: '54px', fontSize: '1.6rem' }}>
+            🔐
           </div>
+          <h1 className="h4 fw-bold text-dark mb-1">Quên mật khẩu?</h1>
+          <p className="text-muted small">
+            Nhập email tài khoản, chúng tôi sẽ hỗ trợ tạo lại mật khẩu mới cho bạn.
+          </p>
+        </div>
+
+        {message && (
+          <div className="alert alert-success border-0 rounded-3 small p-3 mb-3">
+            {message}
+          </div>
+        )}
+
+        {error && (
+          <div className="alert alert-danger border-0 rounded-3 small p-3 mb-3">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label">Email của bạn</label>
+            <input
+              type="email"
+              className="form-control"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-glow w-100 py-2 fw-bold mt-2"
+            disabled={loading}
+            style={{ borderRadius: 'var(--radius-md)' }}
+          >
+            {loading ? '⏳ Đang gửi yêu cầu...' : 'Gửi link đặt lại mật khẩu'}
+          </button>
+        </form>
+
+        {resetUrl && (
+          <div className="mt-3 p-3 bg-light border rounded-3 small">
+            <strong className="d-block mb-1 text-dark">🔗 Link dev test:</strong>
+            <a href={resetUrl} className="text-break text-primary">
+              {resetUrl}
+            </a>
+          </div>
+        )}
+
+        <div className="text-center mt-4 pt-3 border-top">
+          <Link to="/login" className="small fw-semibold text-muted text-decoration-none">
+            ← Quay lại đăng nhập
+          </Link>
         </div>
       </div>
     </div>
