@@ -52,7 +52,12 @@ export async function login(req, res) {
 }
 
 export async function logout(req, res) {
-  res.clearCookie(cookieName);
+  const isProd = process.env.NODE_ENV === 'production';
+  res.clearCookie(cookieName, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+  });
   res.json({ message: 'Đã đăng xuất' });
 }
 
