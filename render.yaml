@@ -1,0 +1,37 @@
+# Render Blueprint Specification
+# Xem hướng dẫn tại: https://render.com/docs/blueprint-spec
+
+services:
+  # Backend API Web Service
+  - type: web
+    name: phone-shop-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false # Điền chuỗi kết nối MongoDB Atlas của bạn
+      - key: JWT_SECRET
+        generateValue: true # Render sẽ tự sinh một chuỗi ngẫu nhiên bảo mật
+      - key: CLIENT_URL
+        sync: false # Điền URL của phone-shop-web (ví dụ: https://phone-shop-web.onrender.com)
+
+  # Frontend React SPA Static Site (Miễn phí, không bị sleep, CDN toàn cầu)
+  - type: static
+    name: phone-shop-web
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      # Rewrite toàn bộ route về index.html để React Router hoạt động khi F5 / refresh trang
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false # Điền URL API backend (ví dụ: https://phone-shop-api.onrender.com/api)
