@@ -59,10 +59,53 @@ app.use(
   })
 );
 
+import Product from './models/Product.js';
+import User from './models/User.js';
+import { phonesData } from './data/phones-data.js';
+
 const uploadDir = process.env.UPLOAD_DIR || 'uploads';
 app.use('/uploads', express.static(path.join(__dirname, '..', uploadDir)));
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
+
+// Endpoint tự động nạp dữ liệu sản phẩm & tài khoản admin lên MongoDB Atlas
+app.get('/api/seed', async (req, res) => {
+  try {
+    const count = await Product.countDocuments();
+    let imported = 0;
+    if (count === 0 || req.query.force === 'true') {
+      await Product.deleteMany({});
+      await Product.insertMany(phonesData);
+      imported = phonesData.length;
+    }
+
+    let admin = await User.findOne({ email: 'admin@phoneshop.com' });
+    if (!admin) {
+      admin = await User.create({
+        username: 'Admin',
+        email: 'admin@phoneshop.com',
+        password: 'admin123',
+        role: 'admin',
+      });
+    } else {
+      admin.role = 'admin';
+      admin.password = 'admin123';
+      await admin.save();
+    }
+
+    res.json({
+      success: true,
+      message: `Database đã nạp ${imported || count} sản phẩm và tạo tài khoản Admin thành công!`,
+      productsCount: imported || count,
+      admin: {
+        email: 'admin@phoneshop.com',
+        password: 'admin123',
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);

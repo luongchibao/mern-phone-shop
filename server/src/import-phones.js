@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import dns from 'dns';
+try { dns.setServers(['8.8.8.8', '1.1.1.1']); } catch (e) {}
 import mongoose from 'mongoose';
 import Product from './models/Product.js';
 import { phonesData } from './data/phones-data.js';
