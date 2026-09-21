@@ -22,8 +22,9 @@ services:
         sync: false # Điền URL của phone-shop-web (ví dụ: https://phone-shop-web.onrender.com)
 
   # Frontend React SPA Static Site (Miễn phí, không bị sleep, CDN toàn cầu)
-  - type: static
+  - type: web
     name: phone-shop-web
+    runtime: static
     rootDir: client
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
