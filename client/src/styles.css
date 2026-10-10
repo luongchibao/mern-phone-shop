@@ -218,6 +218,7 @@ a:hover {
 
 .search-input-modern::placeholder {
   color: rgba(255, 255, 255, 0.55);
+  /* color: #ffffff; */
 }
 
 .search-input-modern:focus {

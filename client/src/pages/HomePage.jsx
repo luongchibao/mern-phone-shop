@@ -379,7 +379,7 @@ export default function HomePage() {
               🔥 HOT DEALS
             </span>
             <h2 className="h4 fw-bold text-dark mb-0">
-              {keyword ? `Kết quả tìm kiếm cho "${keyword}"` : 'Điện Thoại Nổi Bật &amp; Bán Chạy'}
+              {keyword ? `Kết quả tìm kiếm cho "${keyword}"` : 'Điện Thoại Nổi Bật vaf  Bán Chạy'}
             </h2>
           </div>
           {data.total > 0 && (

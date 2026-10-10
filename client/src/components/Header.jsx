@@ -135,10 +135,11 @@ export default function Header() {
                   type="search"
                   placeholder="🔍 Bạn muốn tìm iPhone 16, Galaxy S24 Ultra...?"
                   aria-label="Tìm kiếm sản phẩm"
+                  // style={{color : 'white'}}
                 />
-                <button className="btn search-btn-modern btn-shine" type="submit">
+                {/* <button className="btn search-btn-modern btn-shine" type="submit">
                   Tìm kiếm
-                </button>
+                </button> */}
               </form>
 
               {/* QUICK SUGGESTION TAGS */}
